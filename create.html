@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>특별한 생일 편지 만들기 🎁</title>
+  
+  <!-- 감성적인 구글 폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 아이콘 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- 공통 스타일시트 -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="creator-body">
+  
+  <!-- 1. 편지 작성 폼 영역 -->
+  <div id="create-section" class="view-container creator-container">
+    <div class="candle-glow"></div>
+    <header class="creator-header">
+      <h2><i class="fa-solid fa-wand-magic-sparkles"></i> 생일 편지 제작소</h2>
+      <p class="creator-desc">소중한 친구를 위해 하나뿐인 특별한 축하 페이지를 만들어보세요.</p>
+    </header>
+
+    <form id="creator-form" class="creator-card" onsubmit="event.preventDefault();">
+      <!-- 친구 이름 -->
+      <div class="form-group">
+        <label for="recipient-name"><i class="fa-solid fa-user-heart"></i> 받는 친구의 이름</label>
+        <input type="text" id="recipient-name" required placeholder="예: 민지, 길동이 등">
+      </div>
+
+      <!-- 비밀번호 설정 -->
+      <div class="form-group-row">
+        <div class="form-group">
+          <label for="letter-password"><i class="fa-solid fa-key"></i> 퀴즈 정답 설정</label>
+          <input type="text" id="letter-password" required placeholder="예: 도서관 (띄어쓰기 주의)">
+        </div>
+        <div class="form-group">
+          <label for="password-hint-input"><i class="fa-solid fa-circle-question"></i> 퀴즈 질문 설정</label>
+          <input type="text" id="password-hint-input" required placeholder="예: 우리가 처음 만난 장소는?">
+        </div>
+      </div>
+
+      <!-- 편지 내용 -->
+      <div class="form-group">
+        <label for="letter-text-input"><i class="fa-solid fa-pen-nib"></i> 생일 편지 내용</label>
+        <textarea id="letter-text-input" rows="8" required placeholder="친구에게 전할 진심 어린 편지 내용을 적어주세요. 타자기 효과로 전달됩니다."></textarea>
+      </div>
+
+      <!-- 사진 업로드 드롭존 -->
+      <div class="form-group">
+        <label><i class="fa-solid fa-images"></i> 추억 사진 업로드 (최대 5장)</label>
+        <div id="file-dropzone" class="file-dropzone">
+          <i class="fa-solid fa-cloud-arrow-up dropzone-icon"></i>
+          <p class="dropzone-text">사진을 마우스로 끌어놓거나 클릭하여 선택하세요.</p>
+          <p class="dropzone-limit">PNG, JPG 파일 / 장당 최대 5MB / 1~5장 가능</p>
+          <input type="file" id="file-input" multiple accept="image/*" class="hidden">
+        </div>
+        <!-- 이미지 미리보기 박스 -->
+        <div id="preview-container" class="preview-container"></div>
+      </div>
+
+      <!-- 생성 버튼 -->
+      <button type="submit" id="submit-btn" class="submit-btn">
+        <span class="btn-text">생일 편지 생성하기 🎁</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- 2. 진행 상태 로딩 오버레이 -->
+  <div id="loading-overlay" class="loading-overlay hidden">
+    <div class="loader-card">
+      <div class="loader-spinner">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+      </div>
+      <h3>소중한 추억을 상자에 담는 중...</h3>
+      <p id="progress-text">사진 업로드 대기 중...</p>
+      <div class="progress-bar-wrapper">
+        <div id="progress-bar" class="progress-bar" style="width: 0%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 생성 완료 섹션 -->
+  <div id="success-section" class="view-container hidden">
+    <div class="candle-glow"></div>
+    <div class="creator-card success-card text-center">
+      <div class="success-icon-wrapper">
+        <i class="fa-solid fa-gift success-icon"></i>
+      </div>
+      <h2>생일 축하 페이지가 완성되었습니다! 🎉</h2>
+      <p class="success-desc">아래의 두 링크를 안전하게 보관하세요.</p>
+
+      <!-- 친구용 링크 -->
+      <div class="share-box">
+        <label><i class="fa-solid fa-paper-plane"></i> 1. 친구에게 보낼 생일 편지 링크</label>
+        <div class="link-input-group">
+          <input type="text" id="share-letter-url" readonly>
+          <button id="copy-letter-btn" class="copy-btn"><i class="fa-solid fa-copy"></i> 복사</button>
+        </div>
+        <p class="link-note">* 친구가 암호를 풀면 볼 수 있는 생일 축하 페이지입니다.</p>
+      </div>
+
+      <!-- 제작자용 답장 확인 링크 -->
+      <div class="share-box">
+        <label><i class="fa-solid fa-reply-all"></i> 2. 나만 확인하는 답장 목록 링크</label>
+        <div class="link-input-group">
+          <input type="text" id="share-reply-url" readonly>
+          <button id="copy-reply-btn" class="copy-btn"><i class="fa-solid fa-copy"></i> 복사</button>
+        </div>
+        <p class="link-note">* 친구가 남긴 답장을 실시간으로 확인할 수 있는 제작자 전용 확인 페이지입니다. 분실하지 않도록 주의해 주세요!</p>
+      </div>
+
+      <button id="create-new-btn" class="secondary-btn">새 편지 만들기</button>
+    </div>
+  </div>
+
+  <!-- 4. 답장 확인 섹션 -->
+  <div id="replies-section" class="view-container hidden">
+    <div class="ambient-light"></div>
+    <div class="replies-card-container">
+      <header class="replies-header">
+        <h2 id="replies-title">도도님에게 도착한 답장함 💌</h2>
+        <p class="replies-subtitle">친구가 보낸 마음 따뜻한 메시지를 확인해 보세요.</p>
+      </header>
+
+      <div class="replies-list-card">
+        <div id="replies-list" class="replies-list">
+          <!-- 답장 목록이 로드되는 영역 -->
+          <div class="reply-loading">
+            <i class="fa-solid fa-circle-notch fa-spin"></i> 답장을 불러오는 중입니다...
+          </div>
+        </div>
+      </div>
+
+      <div class="replies-actions">
+        <a id="go-to-viewer-btn" href="#" class="secondary-btn" target="_blank">
+          <i class="fa-solid fa-eye"></i> 보낸 편지 화면 보기
+        </a>
+        <a href="create.html" class="text-link">새 편지 만들기</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 파이어베이스 SDK (Compat 버전) 연결 -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+
+  <!-- 구성 설정 및 스크립트 연결 (type="module" 해제) -->
+  <script src="firebase-config.js"></script>
+  <script src="create.js"></script>
+</body>
+</html>

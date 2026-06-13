@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>생일 축하해! ✨</title>
+  
+  <!-- 감성적인 구글 폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 아이콘 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- 공통 스타일시트 -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- 배경 음악용 오디오 태그 (외부 BGM 사용 시) -->
+  <audio id="local-bgm" loop></audio>
+
+  <!-- [분기 1] 편지 ID가 없을 경우 안내해주는 화면 -->
+  <div id="no-id-container" class="view-container hidden">
+    <div class="candle-glow"></div>
+    <div class="creator-card text-center no-id-card">
+      <div class="no-id-icon-wrapper">
+        <i class="fa-solid fa-wand-magic-sparkles no-id-icon"></i>
+      </div>
+      <h2>생일 축하 편지 제작소 🎁</h2>
+      <p class="no-id-desc-sub">나만의 감성적인 생일 축하 페이지를 직접 만들어보시겠어요?</p>
+      <a href="create.html" class="submit-btn text-decoration-none">
+        <span class="btn-text">생일 편지 만들러 가기 ✨</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- [분기 2] 로딩 중 화면 -->
+  <div id="loading-container" class="view-container">
+    <div class="candle-glow"></div>
+    <!-- 로딩 애니메이션 카드 -->
+    <div id="loading-card" class="loader-card text-center">
+      <div class="loader-spinner">
+        <i class="fa-solid fa-gift fa-bounce" style="color: var(--accent-color); font-size: 3rem;"></i>
+      </div>
+      <h3 style="margin-top: 20px;">친구의 편지를 불러오는 중...</h3>
+    </div>
+    
+    <!-- 에러 알림 카드 (초기 숨김) -->
+    <div id="loading-error-card" class="loader-card text-center hidden">
+      <div class="loader-spinner">
+        <i class="fa-solid fa-circle-exclamation" style="color: #d9534f; font-size: 3rem;"></i>
+      </div>
+      <h3 style="margin-top: 20px; color: #d9534f;">편지를 불러오는 데 실패했습니다.</h3>
+      <p style="margin-top: 10px; font-size: 0.85rem; color: var(--text-muted);">서버가 응답하지 않거나 잘못된 주소일 수 있습니다.</p>
+      <button id="retry-btn" class="submit-btn" style="margin-top: 22px; background-color: var(--text-main);">
+        <span class="btn-text">다시 시도</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- [분기 3] 인트로 화면 (암호 입력 및 선물 상자 개봉) -->
+  <div id="intro-container" class="view-container hidden">
+    <div class="candle-glow"></div>
+    <div class="intro-content">
+      <h2 class="intro-title">소중한 너에게 도착한 특별한 선물</h2>
+      <p class="intro-subtitle">상자를 열어보기 위해 자물쇠를 클릭해줘!</p>
+      
+      <!-- 3D 선물 상자 영역 -->
+      <div class="gift-box-wrapper">
+        <div id="gift-box" class="gift-box">
+          <div class="box-lid">
+            <div class="lid-ribbon-v"></div>
+            <div class="lid-ribbon-h"></div>
+            <div class="ribbon-bow"></div>
+          </div>
+          <div class="box-body">
+            <div class="body-ribbon-v"></div>
+            <div class="body-ribbon-h"></div>
+          </div>
+          <!-- 자물쇠 -->
+          <div id="padlock" class="padlock">
+            <div class="padlock-loop"></div>
+            <div class="padlock-body">
+              <i class="fa-solid fa-lock"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 퀴즈/암호 입력창 (자물쇠 클릭 시 나타남) -->
+      <div id="password-panel" class="password-panel hidden">
+        <div class="quiz-badge"><i class="fa-solid fa-cake-candles"></i> 생일 퀴즈</div>
+        <p id="password-hint" class="hint-text"></p>
+        <form id="password-form" class="password-form" onsubmit="event.preventDefault();">
+          <div class="password-input-wrapper">
+            <input type="text" id="password-input" autocomplete="off" placeholder="정답을 입력해줘...">
+          </div>
+          <button type="submit" id="password-submit-btn">열기</button>
+        </form>
+        <p id="error-message" class="error-message hidden">정답이 아니야! 다시 한번 생각해봐 😢</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- [분기 4] 메인 축하 화면 (선물상자 개봉 후 나타남) -->
+  <div id="main-container" class="view-container hidden">
+    <!-- 배경 은은하게 퍼지는 오버레이 조명 -->
+    <div class="ambient-light"></div>
+    
+    <!-- 상단 헤더 -->
+    <header class="main-header">
+      <h1 id="main-title" class="main-title"></h1>
+      <div class="header-controls">
+        <button id="bgm-toggle" class="bgm-toggle" aria-label="BGM Toggle">
+          <i id="bgm-icon" class="fa-solid fa-music"></i>
+          <span class="bgm-tooltip">음악 끄기/켜기</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 메인 컨텐츠 영역 -->
+    <main class="main-content">
+      <!-- 사진 슬라이드쇼 (폴라로이드 프레임) -->
+      <div class="polaroid-wrapper">
+        <div id="slideshow" class="polaroid-card">
+          <div class="slides-container" id="slides-container">
+            <!-- JavaScript로 이미지 슬라이드가 동적 삽입됩니다 -->
+          </div>
+          <div class="polaroid-footer">
+            <p class="polaroid-caption">우리의 소중한 추억들 ♥</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 편지 영역 (감성적인 종이 텍스처 느낌) -->
+      <div class="letter-card">
+        <div class="letter-paper">
+          <div class="letter-decor">
+            <span class="decor-stamp">💌</span>
+          </div>
+          <div id="letter-content" class="letter-content">
+            <!-- 한 글자씩 타이핑 효과로 출력됩니다 -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 하단 축하 버튼 영역 -->
+    <div class="celebrate-button-wrapper">
+      <button id="celebrate-btn" class="celebrate-btn">
+        <span class="btn-text">축하해! 🎉</span>
+        <span class="btn-sparkle"></span>
+      </button>
+    </div>
+
+    <!-- 친구의 역 답장 작성 영역 -->
+    <section class="reply-form-card">
+      <div class="reply-form-header">
+        <h3><i class="fa-solid fa-reply"></i> 축하해준 친구에게 답장 남기기</h3>
+        <p>마음을 담은 짧은 편지를 남기면 제작자에게 실시간으로 전달됩니다.</p>
+      </div>
+      <form id="reply-form" class="reply-form" onsubmit="event.preventDefault();">
+        <div class="reply-form-group">
+          <input type="text" id="reply-sender-name" required placeholder="내 이름 (보내는 사람)">
+        </div>
+        <div class="reply-form-group">
+          <textarea id="reply-text" rows="4" required placeholder="따뜻한 답장 내용을 적어줘..."></textarea>
+        </div>
+        <button type="submit" id="reply-submit-btn" class="reply-submit-btn">
+          <span>답장 보내기 💌</span>
+        </button>
+      </form>
+      <p id="reply-success-message" class="reply-success-message hidden">
+        <i class="fa-solid fa-circle-check"></i> 답장이 안전하게 발송되었습니다!
+      </p>
+    </section>
+
+    <!-- 제작자 표시 푸터 -->
+    <footer class="creator-footer">
+      <p>제작자: 세빈냥</p>
+    </footer>
+  </div>
+
+  <!-- Confetti 라이브러리 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <!-- 파이어베이스 SDK (일반 로드가 가능한 Compat 버전) 연결 -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <!-- 구성 설정 및 스크립트 연결 -->
+  <script src="config.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="audio.js"></script>
+  <!-- type="module" 제거하여 CORS 보안에 걸리지 않도록 일반 스크립트로 변경 -->
+  <script src="script.js"></script>
+</body>
+</html>

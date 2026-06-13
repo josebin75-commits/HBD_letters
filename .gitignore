@@ -1,0 +1,18 @@
+# IDE 및 에디터 임포트 파일 방지
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS 임시 파일 방지
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# 임시 로그 및 캐시 방지
+*.log
+.npm/
+node_modules/
